@@ -13,6 +13,38 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 <br>
 <br>
 <br>
+## 시뮬레이션
+## 1. 중심극한정리
+``` {r simul_clt}
+x <- list()
+for (i in 1:100){
+x[[i]] <- rnorm(10000 , mean = 20 , sd = 10)
+}
+meanx <- Reduce('+',x)/100
+mean(meanx)
+sd(meanx)
+```
+### 2. 평균 분산
+```{r simul_meanvar}
+meanvar <- function(dist,n = 100,param){
+  # exp, binom
+  if (dist=='expo'){
+    rand <- rexp(n,rate = param[1])
+    m <- 1/param[1]
+    v <- 1/param[1]^2
+  } else if (dist == 'binom'){ 
+    rand <- rbinom(n,size=param[1] , prob = param[2])
+    m<- param[1]*param[2]
+    v <- param[1]*param[2]*(1-param[2])
+  }
+print(mean(rand))
+print(m)
+print(var(rand))
+print(v)
+}
+meanvar('expo',n=10000,0.1)
+meanvar('binom',n=10000,c(1000,0.1))
+```
 
 ### 0. 대상 데이터 확보: 공구 마모 데이터셋
 (https://www.kaggle.com/datasets/shivamb/machine-predictive-maintenance-classification)
@@ -39,7 +71,26 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 
 ### 1. 데이터 탐색 (EDA) 및 전처리
 ```{r data_eda}
+dat <- read.csv('산업공학특론I_3주차_실습 데이터.csv')
+head(dat)
 
+# 불필요 변수 삭제
+dat <- dat[,-(1:2)]
+dat$Target <- as.factor(dat$Target)
+dat$Type <- as.factor(dat$Type)
+dat$Failure.Type <- as.factor(dat$Failure.Type)
+# 데이터 탐색을 위한 시각화 수행
+visualize <- function(x){
+  if(is.factor(x)){
+    barplot(table(x),col = 'grey')
+  }else{
+    hist(x , col = 'grey')
+  }
+}
+par(mfrow = c(4,2))
+for(i in 1:ncol(dat)){
+  visualize(x= dat[,i])
+}
 ```
 
 <br>
@@ -48,8 +99,11 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 
 ### 2. 데이터 그룹화 및 기술통계량 검토
 ```{r data_group}
+dat_split <- split(dat$Tool.wear..min.,dat$Target)
+summary(dat_split)
 
 ```
+
 
 <br>
 <br>
@@ -58,5 +112,14 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 ### 3. 확률분포 적합
 
 ```{r data_dist}
+#install.packages('fitdistrplus')
+library(fitdistrplus)
+
+names(dat_split)
+normal <- dat_split[[1]]
+fail <- dat_split[[2]]
+fitdist(normal,'exp')
+fitdist(fail,'exp')
+
 
 ```
