@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.width=12, fig.height=12)
 ```
 
+
 <br>
 <br>
 <br>
@@ -84,7 +85,7 @@ meanvar(dist='chisq', param=10)
 ```{r data_eda}
 
 # 데이터 로드 및 조회
-dat <- read.csv('산업공학특론I_3주차_실습 데이터.csv')
+dat <- read.csv('../산업공학특론I_3주차_실습 데이터.csv')
 head(dat)
 
 # 필요하지 않은 변수 삭제 / 데이터 전처리
@@ -174,12 +175,12 @@ fit <- function(x){
   
   # 후보 확률분포 정의
   fitlist <- c('exp','gamma','norm')
-
+  i=j=1
   # 모든 그룹에 대한 확률변수 추정 진행
   for (i in 1:length(x)){
     print( '########################################################' )
     print( paste(names(x)[i],'그룹에 대한 추정을 시작합니다.') )
-
+    # fill list is assumed exponential
     # 추정 파라미터와 로그우도값을 추정한 결과를 정리할 틀 생성
     result <- matrix(nrow=3, ncol=length(fitlist))
     colnames(result) <- fitlist
@@ -188,10 +189,8 @@ fit <- function(x){
     # 지정한 후보 확률분포를 각각 추정하여 결과를 틀에 입력
     for (j in 1:length(fitlist)){
       fit_temp <- fitdist(x[[i]], fitlist[j])
-      
       est <- fit_temp$estimate
       if (length(est)==1){ est <- c(est,NA)}
-      
       ll <- fit_temp$loglik
       result[,j] <- c(est, ll)
     }
